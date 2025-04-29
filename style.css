@@ -1,7 +1,22 @@
-:root {
+/* Стили для темы Telegram */
+body.tg-theme-light {
     --bg-color: #f0f8ff;
     --card-color: #ffffff;
     --text-color: #333333;
+}
+
+body.tg-theme-dark {
+    --bg-color: #1a1a2e;
+    --card-color: #16213e;
+    --text-color: #ffffff;
+}
+
+/* Обновите :root для использования переменных Telegram */
+:root {
+    --bg-color: var(--tg-theme-bg-color, #f0f8ff);
+    --card-color: var(--tg-theme-secondary-bg-color, #ffffff);
+    --text-color: var(--tg-theme-text-color, #333333);
+    --hint-color: var(--tg-theme-hint-color, #7f7f7f);
 }
 
 [data-theme="dark"] {
