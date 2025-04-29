@@ -1,11 +1,18 @@
 // Конфигурация
 const API_KEY = "0385b4b3574b96a26453f275b7d20a02";
-let currentCity = "Москва";
+let currentCityName = "Москва"; // Переименовали переменную
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
 tg.expand();
-tg.enableClosingConfirmation();
+
+// Устанавливаем цвета интерфейса Telegram
+tg.setHeaderColor('#4CAF50'); // Зеленый цвет шапки
+tg.setBackgroundColor('#f0f8ff'); // Светло-голубой фон
+
+// Получаем текущую тему Telegram
+const tgTheme = tg.colorScheme; // 'light' или 'dark'
+document.body.dataset.theme = tgTheme;
 
 // Элементы DOM
 const cityInput = document.getElementById('city-input');
@@ -52,7 +59,7 @@ async function fetchWeather(city) {
         localStorage.setItem('lastCity', city);
     } catch (error) {
         console.error("Ошибка:", error);
-        alert("Город не найден! Попробуйте другой.");
+        tg.showAlert("Город не найден! Попробуйте другой.");
     }
 }
 
@@ -85,19 +92,22 @@ function displayWeather(current, forecast) {
     });
 
     // Анимация
-    gsap.from(".current-weather, .forecast-item", {
-        opacity: 0,
-        y: 20,
-        stagger: 0.1,
-        duration: 0.5
-    });
+    if (window.gsap) {
+        gsap.from(".current-weather, .forecast-item", {
+            opacity: 0,
+            y: 20,
+            stagger: 0.1,
+            duration: 0.5
+        });
+    }
 }
 
-// Поиск города
+// Обработчики событий
 searchBtn.addEventListener('click', () => {
-    if (cityInput.value.trim()) {
-        currentCity = cityInput.value.trim();
-        fetchWeather(currentCity);
+    const city = cityInput.value.trim();
+    if (city) {
+        currentCityName = city;
+        fetchWeather(currentCityName);
     }
 });
 
@@ -107,9 +117,15 @@ cityInput.addEventListener('keypress', (e) => {
     }
 });
 
-// Загрузка последнего города при старте
-window.addEventListener('DOMContentLoaded', () => {
+// Загрузка при старте
+document.addEventListener('DOMContentLoaded', () => {
     const savedCity = localStorage.getItem('lastCity') || 'Москва';
     cityInput.value = savedCity;
-    fetchWeather(savedCity);
+    currentCityName = savedCity;
+    fetchWeather(currentCityName);
+});
+
+// Обработка изменений темы Telegram
+tg.onEvent('themeChanged', () => {
+    document.body.dataset.theme = tg.colorScheme;
 });
