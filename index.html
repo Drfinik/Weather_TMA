@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>Погода</h1>
+            <div class="search">
+                <input type="text" id="city-input" placeholder="Город...">
+                <button id="search-btn">🔍</button>
+            </div>
+        </div>
+
+        <div class="current-weather">
+            <div class="weather-icon" id="current-icon">☀️</div>
+            <div class="temp" id="current-temp">24°C</div>
+            <div class="city" id="current-city">Москва</div>
+            <div class="details">
+                <span id="humidity">💧 65%</span>
+                <span id="wind">🌬️ 12 км/ч</span>
+            </div>
+        </div>
+
+        <div class="forecast" id="forecast"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
