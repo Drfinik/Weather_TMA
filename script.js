@@ -4,24 +4,24 @@ let currentCityName = "Москва";
 
 // Фоновые изображения для разных типов погоды
 const weatherBackgrounds = {
-    '01d': 'https://assets.codepen.io/557388/sunny.jpg',
-    '01n': 'https://assets.codepen.io/557388/night.jpg',
-    '02d': 'https://assets.codepen.io/557388/partly-cloudy.jpg',
-    '02n': 'https://assets.codepen.io/557388/partly-cloudy-night.jpg',
-    '03d': 'https://assets.codepen.io/557388/cloudy.jpg',
-    '03n': 'https://assets.codepen.io/557388/cloudy-night.jpg',
-    '04d': 'https://assets.codepen.io/557388/overcast.jpg',
-    '04n': 'https://assets.codepen.io/557388/overcast-night.jpg',
-    '09d': 'https://assets.codepen.io/557388/rain.jpg',
-    '09n': 'https://assets.codepen.io/557388/rain-night.jpg',
-    '10d': 'https://assets.codepen.io/557388/showers.jpg',
-    '10n': 'https://assets.codepen.io/557388/showers-night.jpg',
-    '11d': 'https://assets.codepen.io/557388/thunderstorm.jpg',
-    '11n': 'https://assets.codepen.io/557388/thunderstorm-night.jpg',
-    '13d': 'https://assets.codepen.io/557388/snow.jpg',
-    '13n': 'https://assets.codepen.io/557388/snow-night.jpg',
-    '50d': 'https://assets.codepen.io/557388/fog.jpg',
-    '50n': 'https://assets.codepen.io/557388/fog-night.jpg'
+    '01d': 'images/sunny.jpg',
+    '01n': 'images/night.jpg',
+    '02d': 'images/partly-cloudy.jpg',
+    '02n': 'images/partly-cloudy-night.jpg',
+    '03d': 'images/cloudy.jpg',
+    '03n': 'images/cloudy-night.jpg',
+    '04d': 'images/overcast.jpg',
+    '04n': 'images/overcast-night.jpg',
+    '09d': 'images/rain.jpg',
+    '09n': 'images/rain-night.jpg',
+    '10d': 'images/showers.jpg',
+    '10n': 'images/showers-night.jpg',
+    '11d': 'images/thunderstorm.jpg',
+    '11n': 'images/thunderstorm-night.jpg',
+    '13d': 'images/snow.jpg',
+    '13n': 'images/snow-night.jpg',
+    '50d': 'images/fog.jpg',
+    '50n': 'images/fog-night.jpg'
 };
 
 // Инициализация Telegram WebApp
