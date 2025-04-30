@@ -3,37 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
+    <title>Погода</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
 </head>
 <body>
     <div class="app">
-        <div class="header">
-            <h1>Погода</h1>
-            <div class="search-container">
-                <div class="search">
-                    <input type="text" id="city-input" placeholder="Город...">
-                    <button id="search-btn">🔍</button>
-                    <button id="location-btn" class="location-btn">📍</button>
+        <div class="weather-header">
+            <div class="location-controls">
+                <button id="location-btn" class="location-btn">📍</button>
+                <div class="search-container">
+                    <input type="text" id="city-input" placeholder="Поиск города...">
+                    <div class="city-suggestions"></div>
                 </div>
-                <div class="city-suggestions"></div>
+                <button id="search-btn" class="search-btn">🔍</button>
+            </div>
+            <div class="main-info">
+                <div class="city" id="current-city">Москва</div>
+                <div class="temp" id="current-temp">24°</div>
+                <div class="condition" id="current-condition">Солнечно</div>
+                <div class="high-low">
+                    <span id="temp-max">Макс.: 26°</span>
+                    <span id="temp-min">Мин.: 18°</span>
+                </div>
             </div>
         </div>
 
-        <div class="current-weather">
+        <div class="weather-card">
             <div class="weather-icon" id="current-icon">☀️</div>
-            <div class="temp" id="current-temp">24°C</div>
-            <div class="city" id="current-city">Москва</div>
-            <div class="details">
-                <span id="humidity">💧 65%</span>
-                <span id="wind">🌬️ 12 км/ч</span>
-            </div>
-            <div class="weather-details"></div>
+            <div class="hourly-forecast" id="hourly-forecast"></div>
         </div>
 
-        <div class="forecast" id="forecast"></div>
+        <div class="daily-forecast" id="daily-forecast"></div>
+
+        <div class="weather-details">
+            <div class="detail-card">
+                <span>Восход</span>
+                <span id="sunrise">5:42</span>
+            </div>
+            <div class="detail-card">
+                <span>Закат</span>
+                <span id="sunset">21:18</span>
+            </div>
+            <div class="detail-card">
+                <span>Влажность</span>
+                <span id="humidity">65%</span>
+            </div>
+            <div class="detail-card">
+                <span>Ветер</span>
+                <span id="wind">12 км/ч</span>
+            </div>
+            <div class="detail-card">
+                <span>Ощущается</span>
+                <span id="feels-like">26°</span>
+            </div>
+            <div class="detail-card">
+                <span>Давление</span>
+                <span id="pressure">765 мм</span>
+            </div>
+            <div class="detail-card">
+                <span>Видимость</span>
+                <span id="visibility">10 км</span>
+            </div>
+            <div class="detail-card">
+                <span>УФ-индекс</span>
+                <span id="uv-index">5</span>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
