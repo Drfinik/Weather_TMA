@@ -3,26 +3,14 @@ body.tg-theme-light {
     --bg-color: #f0f8ff;
     --card-color: #ffffff;
     --text-color: #333333;
+    --hint-color: #7f7f7f;
 }
 
 body.tg-theme-dark {
     --bg-color: #1a1a2e;
     --card-color: #16213e;
     --text-color: #ffffff;
-}
-
-/* Обновите :root для использования переменных Telegram */
-:root {
-    --bg-color: var(--tg-theme-bg-color, #f0f8ff);
-    --card-color: var(--tg-theme-secondary-bg-color, #ffffff);
-    --text-color: var(--tg-theme-text-color, #333333);
-    --hint-color: var(--tg-theme-hint-color, #7f7f7f);
-}
-
-[data-theme="dark"] {
-    --bg-color: #1a1a2e;
-    --card-color: #16213e;
-    --text-color: #ffffff;
+    --hint-color: #aaaaaa;
 }
 
 body {
@@ -44,20 +32,26 @@ body {
     margin-bottom: 20px;
 }
 
+.search-container {
+    position: relative;
+    margin-top: 15px;
+}
+
 .search {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
 }
 
 #city-input {
     flex: 1;
     padding: 10px;
     border-radius: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--hint-color);
+    background: var(--card-color);
+    color: var(--text-color);
 }
 
-#search-btn {
+#search-btn, .location-btn {
     background: #4CAF50;
     color: white;
     border: none;
@@ -65,6 +59,35 @@ body {
     width: 40px;
     height: 40px;
     cursor: pointer;
+    flex-shrink: 0;
+}
+
+.location-btn {
+    background: #2196F3;
+}
+
+.city-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-color);
+    border-radius: 0 0 15px 15px;
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: none;
+}
+
+.suggestion {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--hint-color);
+}
+
+.suggestion:hover {
+    background-color: rgba(0,0,0,0.1);
 }
 
 .current-weather {
@@ -97,6 +120,25 @@ body {
     margin-top: 15px;
 }
 
+.weather-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--hint-color);
+}
+
+.detail {
+    display: flex;
+    justify-content: space-between;
+}
+
+.detail span:first-child {
+    color: var(--hint-color);
+    font-size: 14px;
+}
+
 .forecast {
     display: flex;
     gap: 10px;
@@ -111,4 +153,5 @@ body {
     min-width: 80px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    flex-shrink: 0;
 }
