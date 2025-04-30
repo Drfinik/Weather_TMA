@@ -1,34 +1,43 @@
-/:root {
-    --bg-gradient-day: linear-gradient(180deg, #47ABFF 0%, #1A76D0 100%);
-    --bg-gradient-night: linear-gradient(180deg, #0F3443 0%, #1A1A2E 100%);
-    --card-bg-day: rgba(255, 255, 255, 0.2);
-    --card-bg-night: rgba(0, 0, 0, 0.2);
-    --text-color-light: #FFFFFF;
-    --text-color-dark: #333333;
+:root {
+    --card-bg: rgba(28, 28, 30, 0.8);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(235, 235, 245, 0.6);
+    --card-radius: 16px;
+    --card-gap: 20px;
 }
 
 body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    color: var(--text-color-light);
-    background: var(--bg-gradient-day);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    color: var(--text-primary);
     min-height: 100vh;
-    transition: background 0.5s ease;
+    overflow-x: hidden;
 }
 
-body.night {
-    background: var(--bg-gradient-night);
+.weather-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.5s ease;
 }
 
 .app {
     padding: 20px;
     max-width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-gap);
 }
 
-.weather-header {
-    margin-bottom: 30px;
+.header {
+    padding-top: 20px;
 }
 
 .location-controls {
@@ -38,28 +47,23 @@ body.night {
     margin-bottom: 30px;
 }
 
-.search-container {
-    position: relative;
-    flex-grow: 1;
-}
-
 #city-input {
-    width: 100%;
+    flex-grow: 1;
     padding: 12px 15px;
     border-radius: 10px;
     border: none;
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
+    background: rgba(118, 118, 128, 0.24);
     color: white;
     font-size: 16px;
+    backdrop-filter: blur(20px);
 }
 
 #city-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(235, 235, 245, 0.6);
 }
 
-.location-btn, .search-btn {
-    background: rgba(255, 255, 255, 0.3);
+#location-btn {
+    background: rgba(118, 118, 128, 0.24);
     border: none;
     border-radius: 10px;
     width: 44px;
@@ -67,35 +71,14 @@ body.night {
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(10px);
-    cursor: pointer;
-}
-
-.city-suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(20px);
-    border-radius: 10px;
-    margin-top: 5px;
-    overflow: hidden;
-    z-index: 100;
-    display: none;
-}
-
-.suggestion {
-    padding: 12px 15px;
     cursor: pointer;
+    color: white;
 }
 
-.suggestion:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.main-info {
+.current-weather {
     text-align: center;
+    margin-bottom: 20px;
 }
 
 .city {
@@ -113,6 +96,7 @@ body.night {
 .condition {
     font-size: 20px;
     margin-bottom: 15px;
+    color: var(--text-primary);
 }
 
 .high-low {
@@ -120,32 +104,31 @@ body.night {
     justify-content: center;
     gap: 15px;
     font-size: 16px;
+    color: var(--text-secondary);
 }
 
-.weather-card {
-    background: var(--card-bg-day);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--card-radius);
     padding: 20px;
-    margin-bottom: 20px;
-    text-align: center;
 }
 
-body.night .weather-card {
-    background: var(--card-bg-night);
-}
-
-.weather-icon {
-    font-size: 100px;
-    margin: 10px 0;
+.hourly-forecast-container h3,
+.daily-forecast-container h3,
+.weather-details h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
 .hourly-forecast {
     display: flex;
     overflow-x: auto;
-    gap: 15px;
+    gap: 25px;
     padding: 10px 0;
-    margin-top: 20px;
 }
 
 .hourly-item {
@@ -157,40 +140,25 @@ body.night .weather-card {
 
 .hourly-item .time {
     font-size: 14px;
-    margin-bottom: 5px;
-}
-
-.hourly-item .icon {
-    font-size: 24px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
 }
 
 .hourly-item .temp {
     font-size: 18px;
+    margin-top: 8px;
 }
 
 .daily-forecast {
-    background: var(--card-bg-day);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-body.night .daily-forecast {
-    background: var(--card-bg-night);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .daily-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.daily-item:last-child {
-    border-bottom: none;
 }
 
 .daily-item .day {
@@ -199,14 +167,15 @@ body.night .daily-forecast {
 }
 
 .daily-item .icon {
-    font-size: 24px;
-    width: 40px;
+    width: 30px;
     text-align: center;
 }
 
 .daily-item .temps {
     display: flex;
     gap: 15px;
+    width: 80px;
+    justify-content: flex-end;
 }
 
 .daily-item .max-temp {
@@ -214,37 +183,52 @@ body.night .daily-forecast {
 }
 
 .daily-item .min-temp {
-    opacity: 0.7;
+    color: var(--text-secondary);
 }
 
-.weather-details {
+.details-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
 }
 
-.detail-card {
-    background: var(--card-bg-day);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 15px;
+.detail-item {
     display: flex;
     flex-direction: column;
 }
 
-body.night .detail-card {
-    background: var(--card-bg-night);
-}
-
-.detail-card span:first-child {
+.detail-item span:first-child {
     font-size: 14px;
-    opacity: 0.8;
+    color: var(--text-secondary);
     margin-bottom: 5px;
 }
 
-.detail-card span:last-child {
+.detail-item span:last-child {
     font-size: 18px;
     font-weight: 500;
+}
+
+.city-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border-radius: 10px;
+    margin-top: 5px;
+    overflow: hidden;
+    z-index: 100;
+    display: none;
+    backdrop-filter: blur(20px);
+}
+
+.suggestion {
+    padding: 12px 15px;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* Анимации */
@@ -253,6 +237,6 @@ body.night .detail-card {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.weather-card, .daily-forecast, .weather-details {
+.card {
     animation: fadeIn 0.5s ease-out forwards;
 }
