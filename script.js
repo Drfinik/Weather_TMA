@@ -45,7 +45,7 @@ async function fetchWeather(city) {
         const currentData = await currentResponse.json();
         
         if (currentData.cod !== 200) {
-            throw new Error(currentData.message || "Город не найден");
+            throw new Error("Город не найден! Попробуйте другой.");
         }
 
         // Прогноз на 5 дней
@@ -69,7 +69,7 @@ async function fetchWeather(city) {
         console.error("Ошибка:", error);
         // Показываем ошибку только если это не первый запуск
         if (cityInput.value.trim()) {
-            tg.showAlert(error.message || "Ошибка при получении данных");
+            tg.showAlert("Город не найден! Попробуйте другой.");
         }
     }
 }
