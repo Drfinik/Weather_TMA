@@ -2,6 +2,28 @@
 const API_KEY = "0385b4b3574b96a26453f275b7d20a02";
 let currentCityName = "Москва";
 
+// Фоновые изображения для разных типов погоды
+const weatherBackgrounds = {
+    '01d': 'https://assets.codepen.io/557388/sunny.jpg',
+    '01n': 'https://assets.codepen.io/557388/night.jpg',
+    '02d': 'https://assets.codepen.io/557388/partly-cloudy.jpg',
+    '02n': 'https://assets.codepen.io/557388/partly-cloudy-night.jpg',
+    '03d': 'https://assets.codepen.io/557388/cloudy.jpg',
+    '03n': 'https://assets.codepen.io/557388/cloudy-night.jpg',
+    '04d': 'https://assets.codepen.io/557388/overcast.jpg',
+    '04n': 'https://assets.codepen.io/557388/overcast-night.jpg',
+    '09d': 'https://assets.codepen.io/557388/rain.jpg',
+    '09n': 'https://assets.codepen.io/557388/rain-night.jpg',
+    '10d': 'https://assets.codepen.io/557388/showers.jpg',
+    '10n': 'https://assets.codepen.io/557388/showers-night.jpg',
+    '11d': 'https://assets.codepen.io/557388/thunderstorm.jpg',
+    '11n': 'https://assets.codepen.io/557388/thunderstorm-night.jpg',
+    '13d': 'https://assets.codepen.io/557388/snow.jpg',
+    '13n': 'https://assets.codepen.io/557388/snow-night.jpg',
+    '50d': 'https://assets.codepen.io/557388/fog.jpg',
+    '50n': 'https://assets.codepen.io/557388/fog-night.jpg'
+};
+
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
 tg.expand();
@@ -9,11 +31,9 @@ tg.expand();
 // Элементы DOM
 const elements = {
     cityInput: document.getElementById('city-input'),
-    searchBtn: document.getElementById('search-btn'),
     locationBtn: document.getElementById('location-btn'),
-    currentIcon: document.getElementById('current-icon'),
-    currentTemp: document.getElementById('current-temp'),
     currentCity: document.getElementById('current-city'),
+    currentTemp: document.getElementById('current-temp'),
     currentCondition: document.getElementById('current-condition'),
     tempMax: document.getElementById('temp-max'),
     tempMin: document.getElementById('temp-min'),
@@ -27,10 +47,11 @@ const elements = {
     uvIndex: document.getElementById('uv-index'),
     hourlyForecast: document.getElementById('hourly-forecast'),
     dailyForecast: document.getElementById('daily-forecast'),
-    citySuggestions: document.querySelector('.city-suggestions')
+    citySuggestions: document.querySelector('.city-suggestions'),
+    weatherBg: document.getElementById('weather-bg')
 };
 
-// Иконки погоды (обновленные)
+// Иконки погоды
 const weatherIcons = {
     '01d': '☀️', '01n': '🌙',
     '02d': '⛅', '02n': '⛅',
@@ -41,17 +62,6 @@ const weatherIcons = {
     '11d': '⛈️', '11n': '⛈️',
     '13d': '❄️', '13n': '❄️',
     '50d': '🌫️', '50n': '🌫️'
-};
-
-// Состояния погоды на русском
-const weatherConditions = {
-    'clear': 'Ясно',
-    'clouds': 'Облачно',
-    'rain': 'Дождь',
-    'thunderstorm': 'Гроза',
-    'snow': 'Снег',
-    'mist': 'Туман',
-    'drizzle': 'Морось'
 };
 
 // Автодополнение городов
@@ -169,9 +179,8 @@ async function fetchWeather(city) {
             throw new Error("Ошибка при получении прогноза");
         }
 
-        // Устанавливаем тему (день/ночь)
-        const isNight = !currentData.weather[0].icon.includes('d');
-        document.body.classList.toggle('night', isNight);
+        // Устанавливаем фон в зависимости от погоды
+        setWeatherBackground(currentData.weather[0].icon);
 
         // Отображаем данные
         displayWeather(currentData, forecastData);
@@ -186,12 +195,17 @@ async function fetchWeather(city) {
     }
 }
 
+// Установка фона в зависимости от погоды
+function setWeatherBackground(iconCode) {
+    const bgImage = weatherBackgrounds[iconCode] || weatherBackgrounds['01d'];
+    elements.weatherBg.style.backgroundImage = `url(${bgImage})`;
+}
+
 // Отображение погоды
 function displayWeather(current, forecast) {
     // Основная информация
-    elements.currentIcon.textContent = weatherIcons[current.weather[0].icon] || '🌤️';
-    elements.currentTemp.textContent = `${Math.round(current.main.temp)}°`;
     elements.currentCity.textContent = current.name;
+    elements.currentTemp.textContent = `${Math.round(current.main.temp)}°`;
     elements.currentCondition.textContent = current.weather[0].description;
     elements.tempMax.textContent = `Макс.: ${Math.round(current.main.temp_max)}°`;
     elements.tempMin.textContent = `Мин.: ${Math.round(current.main.temp_min)}°`;
@@ -209,8 +223,8 @@ function displayWeather(current, forecast) {
     const uvIndex = Math.min(Math.round(current.main.temp / 5), 10);
     elements.uvIndex.textContent = uvIndex;
 
-    // Почасовой прогноз (первые 12 часов)
-    forecast.list.slice(0, 12).forEach(hour => {
+    // Почасовой прогноз (первые 24 часа)
+    forecast.list.slice(0, 24).forEach(hour => {
         const hourItem = document.createElement('div');
         hourItem.className = 'hourly-item';
         hourItem.innerHTML = `
@@ -221,9 +235,9 @@ function displayWeather(current, forecast) {
         elements.hourlyForecast.appendChild(hourItem);
     });
 
-    // Дневной прогноз (следующие 5 дней)
+    // Дневной прогноз (10 дней)
     const dailyForecast = forecast.list.filter((item, index) => index % 8 === 0);
-    dailyForecast.slice(1, 6).forEach(day => {
+    dailyForecast.slice(0, 10).forEach(day => {
         const dayItem = document.createElement('div');
         dayItem.className = 'daily-item';
         dayItem.innerHTML = `
@@ -239,7 +253,7 @@ function displayWeather(current, forecast) {
 
     // Анимация
     if (window.gsap) {
-        gsap.from(".weather-card, .daily-forecast, .detail-card", {
+        gsap.from(".card", {
             opacity: 0,
             y: 20,
             stagger: 0.1,
@@ -249,16 +263,12 @@ function displayWeather(current, forecast) {
 }
 
 // Обработчики событий
-elements.searchBtn.addEventListener('click', () => {
-    const city = elements.cityInput.value.trim();
-    if (city) {
-        fetchWeather(city);
-    }
-});
-
 elements.cityInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        elements.searchBtn.click();
+        const city = elements.cityInput.value.trim();
+        if (city) {
+            fetchWeather(city);
+        }
     }
 });
 
