@@ -12,9 +12,13 @@
     <div class="app">
         <div class="header">
             <h1>Погода</h1>
-            <div class="search">
-                <input type="text" id="city-input" placeholder="Город...">
-                <button id="search-btn">🔍</button>
+            <div class="search-container">
+                <div class="search">
+                    <input type="text" id="city-input" placeholder="Город...">
+                    <button id="search-btn">🔍</button>
+                    <button id="location-btn" class="location-btn">📍</button>
+                </div>
+                <div class="city-suggestions"></div>
             </div>
         </div>
 
@@ -26,6 +30,7 @@
                 <span id="humidity">💧 65%</span>
                 <span id="wind">🌬️ 12 км/ч</span>
             </div>
+            <div class="weather-details"></div>
         </div>
 
         <div class="forecast" id="forecast"></div>
