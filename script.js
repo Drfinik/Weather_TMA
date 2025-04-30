@@ -44,12 +44,22 @@ async function fetchWeather(city) {
         const currentResponse = await fetch(
             `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}&lang=ru`
         );
+        
+        if (!currentResponse.ok) {
+            throw new Error("Город не найден");
+        }
+        
         const currentData = await currentResponse.json();
 
         // Прогноз на 5 дней
         const forecastResponse = await fetch(
             `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${API_KEY}&lang=ru`
         );
+        
+        if (!forecastResponse.ok) {
+            throw new Error("Ошибка при получении прогноза");
+        }
+        
         const forecastData = await forecastResponse.json();
 
         // Отображение данных
@@ -59,7 +69,7 @@ async function fetchWeather(city) {
         localStorage.setItem('lastCity', city);
     } catch (error) {
         console.error("Ошибка:", error);
-        tg.showAlert("Город не найден! Попробуйте другой.");
+        tg.showAlert(error.message || "Произошла ошибка при получении данных о погоде");
     }
 }
 
