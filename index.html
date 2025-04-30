@@ -9,17 +9,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
 </head>
 <body>
+    <div class="weather-bg" id="weather-bg"></div>
+    
     <div class="app">
-        <div class="weather-header">
+        <div class="header">
             <div class="location-controls">
-                <button id="location-btn" class="location-btn">📍</button>
+                <button id="location-btn">📍</button>
                 <div class="search-container">
-                    <input type="text" id="city-input" placeholder="Поиск города...">
+                    <input type="text" id="city-input" placeholder="Поиск города">
                     <div class="city-suggestions"></div>
                 </div>
-                <button id="search-btn" class="search-btn">🔍</button>
             </div>
-            <div class="main-info">
+            
+            <div class="current-weather">
                 <div class="city" id="current-city">Москва</div>
                 <div class="temp" id="current-temp">24°</div>
                 <div class="condition" id="current-condition">Солнечно</div>
@@ -30,45 +32,51 @@
             </div>
         </div>
 
-        <div class="weather-card">
-            <div class="weather-icon" id="current-icon">☀️</div>
+        <div class="hourly-forecast-container card">
+            <h3>Почасовой прогноз</h3>
             <div class="hourly-forecast" id="hourly-forecast"></div>
         </div>
 
-        <div class="daily-forecast" id="daily-forecast"></div>
+        <div class="daily-forecast-container card">
+            <h3>Прогноз на 10 дней</h3>
+            <div class="daily-forecast" id="daily-forecast"></div>
+        </div>
 
-        <div class="weather-details">
-            <div class="detail-card">
-                <span>Восход</span>
-                <span id="sunrise">5:42</span>
-            </div>
-            <div class="detail-card">
-                <span>Закат</span>
-                <span id="sunset">21:18</span>
-            </div>
-            <div class="detail-card">
-                <span>Влажность</span>
-                <span id="humidity">65%</span>
-            </div>
-            <div class="detail-card">
-                <span>Ветер</span>
-                <span id="wind">12 км/ч</span>
-            </div>
-            <div class="detail-card">
-                <span>Ощущается</span>
-                <span id="feels-like">26°</span>
-            </div>
-            <div class="detail-card">
-                <span>Давление</span>
-                <span id="pressure">765 мм</span>
-            </div>
-            <div class="detail-card">
-                <span>Видимость</span>
-                <span id="visibility">10 км</span>
-            </div>
-            <div class="detail-card">
-                <span>УФ-индекс</span>
-                <span id="uv-index">5</span>
+        <div class="weather-details card">
+            <h3>Подробности</h3>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span>Восход</span>
+                    <span id="sunrise">5:42</span>
+                </div>
+                <div class="detail-item">
+                    <span>Закат</span>
+                    <span id="sunset">21:18</span>
+                </div>
+                <div class="detail-item">
+                    <span>Влажность</span>
+                    <span id="humidity">65%</span>
+                </div>
+                <div class="detail-item">
+                    <span>Ветер</span>
+                    <span id="wind">12 км/ч</span>
+                </div>
+                <div class="detail-item">
+                    <span>Ощущается</span>
+                    <span id="feels-like">26°</span>
+                </div>
+                <div class="detail-item">
+                    <span>Давление</span>
+                    <span id="pressure">765 мм</span>
+                </div>
+                <div class="detail-item">
+                    <span>Видимость</span>
+                    <span id="visibility">10 км</span>
+                </div>
+                <div class="detail-item">
+                    <span>УФ-индекс</span>
+                    <span id="uv-index">5</span>
+                </div>
             </div>
         </div>
     </div>
