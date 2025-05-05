@@ -2,7 +2,21 @@
 const API_KEY = "0385b4b3574b96a26453f275b7d20a02";
 let currentCityName = "Москва";
 
-// Фоновые изображения для разных типов погоды
+// Проверка среды выполнения
+const isTelegram = () => {
+    return window.Telegram && Telegram.WebApp && Telegram.WebApp.initData;
+};
+
+// Универсальная функция показа сообщений
+const showAlert = (message) => {
+    if (isTelegram()) {
+        Telegram.WebApp.showAlert(message);
+    } else {
+        alert(message);
+    }
+};
+
+// Фоновые изображения
 const weatherBackgrounds = {
     '01d': 'images/sunny.jpg',
     '01n': 'images/night.jpg',
@@ -25,8 +39,9 @@ const weatherBackgrounds = {
 };
 
 // Инициализация Telegram WebApp
-const tg = window.Telegram.WebApp;
-tg.expand();
+if (isTelegram()) {
+    Telegram.WebApp.expand();
+}
 
 // Элементы DOM
 const elements = {
@@ -49,7 +64,8 @@ const elements = {
     hourlyForecast: document.getElementById('hourly-forecast'),
     dailyForecast: document.getElementById('daily-forecast'),
     citySuggestions: document.querySelector('.city-suggestions'),
-    weatherBg: document.getElementById('weather-bg')
+    weatherBg: document.getElementById('weather-bg'),
+    geoError: document.getElementById('geo-error')
 };
 
 // Иконки погоды
@@ -64,6 +80,104 @@ const weatherIcons = {
     '13d': '❄️', '13n': '❄️',
     '50d': '🌫️', '50n': '🌫️'
 };
+
+// Функция получения геолокации
+async function getBrowserLocation() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error("Геолокация не поддерживается вашим браузером"));
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            position => resolve(position),
+            error => {
+                let errorMessage = "Не удалось определить местоположение";
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = "Доступ к геолокации запрещен. Разрешите доступ в настройках браузера";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = "Информация о местоположении недоступна";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = "Время ожидания определения местоположения истекло";
+                        break;
+                }
+                reject(new Error(errorMessage));
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    });
+}
+
+// Улучшенная функция определения местоположения
+async function getLocation() {
+    try {
+        if (isTelegram()) {
+            return new Promise((resolve, reject) => {
+                Telegram.WebApp.showPopup({
+                    title: "Доступ к геолокации",
+                    message: "Разрешить доступ к вашему местоположению?",
+                    buttons: [
+                        {id: 'yes', type: 'default', text: 'Разрешить'},
+                        {type: 'cancel', text: 'Отмена'}
+                    ]
+                }, async (buttonId) => {
+                    if (buttonId === 'yes') {
+                        try {
+                            const position = await getBrowserLocation();
+                            resolve(position);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    } else {
+                        reject(new Error("Доступ к геолокации отклонен"));
+                    }
+                });
+            });
+        } else {
+            return await getBrowserLocation();
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+// Обработчик кнопки локации
+elements.locationBtn.addEventListener('click', async () => {
+    try {
+        if (elements.geoError) elements.geoError.textContent = '';
+        
+        const position = await getLocation();
+        const { latitude, longitude } = position.coords;
+        
+        const response = await fetch(
+            `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`
+        );
+        const locationData = await response.json();
+        
+        if (locationData.length > 0) {
+            const city = locationData[0].name;
+            elements.cityInput.value = city;
+            await fetchWeather(city);
+        } else {
+            throw new Error("Не удалось определить город по координатам");
+        }
+    } catch (error) {
+        console.error('Ошибка определения местоположения:', error);
+        if (elements.geoError) {
+            elements.geoError.textContent = error.message;
+            elements.geoError.style.display = 'block';
+        } else {
+            showAlert(error.message);
+        }
+    }
+});
 
 // Автодополнение городов
 elements.cityInput.addEventListener('input', async (e) => {
@@ -110,61 +224,14 @@ elements.searchBtn.addEventListener('click', () => {
     }
 });
 
-// Скрываем подсказки при клике вне поля
-document.addEventListener('click', (e) => {
-    if (e.target !== elements.cityInput && e.target !== elements.searchBtn) {
-        elements.citySuggestions.style.display = 'none';
-    }
-});
-
-// Определение местоположения
-function getLocation() {
-    if (navigator.geolocation) {
-        tg.showPopup({
-            title: "Доступ к геолокации",
-            message: "Разрешить доступ к вашему местоположению?",
-            buttons: [
-                {id: 'yes', type: 'default', text: 'Разрешить'},
-                {type: 'cancel', text: 'Отмена'}
-            ]
-        }, (buttonId) => {
-            if (buttonId === 'yes') {
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const { latitude, longitude } = position.coords;
-                        try {
-                            const response = await fetch(
-                                `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`
-                            );
-                            const locationData = await response.json();
-                            if (locationData.length > 0) {
-                                const city = locationData[0].name;
-                                elements.cityInput.value = city;
-                                fetchWeather(city);
-                            }
-                        } catch (error) {
-                            console.error('Ошибка определения города:', error);
-                            tg.showAlert("Не удалось определить город. Введите вручную.");
-                        }
-                    },
-                    (error) => {
-                        console.error('Ошибка геолокации:', error);
-                        tg.showAlert("Не удалось определить местоположение.");
-                    }
-                );
-            }
-        });
-    } else {
-        tg.showAlert("Геолокация не поддерживается вашим браузером.");
-    }
-}
-
-elements.locationBtn.addEventListener('click', getLocation);
-
 // Загрузка погоды
 async function fetchWeather(city) {
     try {
-        // Очищаем предыдущие данные
+        if (!city) {
+            showAlert("Пожалуйста, введите название города");
+            return;
+        }
+
         elements.hourlyForecast.innerHTML = '';
         elements.dailyForecast.innerHTML = '';
         
@@ -193,19 +260,14 @@ async function fetchWeather(city) {
             throw new Error("Ошибка при получении данных");
         }
 
-        // Устанавливаем фон
         setWeatherBackground(currentData.weather[0].icon);
-
-        // Отображаем данные
         displayWeather(currentData, forecastData);
         localStorage.setItem('lastCity', city);
         currentCityName = city;
         
     } catch (error) {
         console.error("Ошибка:", error);
-        if (elements.cityInput.value.trim()) {
-            tg.showAlert(error.message || "Ошибка при получении данных");
-        }
+        showAlert(error.message || "Ошибка при получении данных");
     }
 }
 
@@ -215,12 +277,7 @@ function setWeatherBackground(iconCode) {
     elements.weatherBg.style.backgroundImage = `url(${bgImage})`;
 }
 
-// Функция интерполяции между двумя значениями
-function interpolate(start, end, ratio) {
-    return start + (end - start) * ratio;
-}
-
-// Отображение погоды с интерполяцией
+// Отображение погоды
 function displayWeather(current, forecast) {
     // Основная информация
     elements.currentCity.textContent = current.name;
@@ -242,51 +299,31 @@ function displayWeather(current, forecast) {
     const uvIndex = Math.min(Math.round(current.main.temp / 5), 10);
     elements.uvIndex.textContent = uvIndex;
 
-    // Почасовой прогноз с интерполяцией
+    // Почасовой прогноз
+    elements.hourlyForecast.innerHTML = '';
     const now = new Date();
     const currentHour = now.getHours();
-    const currentTime = now.getTime();
     
     // Создаем массив для 24 часов
-    elements.hourlyForecast.innerHTML = '';
-    
     for (let i = 0; i < 24; i++) {
         const targetHour = (currentHour + i) % 24;
         const targetTime = new Date(now);
         targetTime.setHours(targetHour, 0, 0, 0);
         const targetTimestamp = targetTime.getTime();
         
-        // Находим два ближайших прогноза
-        let prevForecast = forecast.list[0];
-        let nextForecast = forecast.list[forecast.list.length - 1];
+        // Находим ближайший прогноз
+        const closest = forecast.list.reduce((prev, curr) => {
+            const prevDiff = Math.abs(new Date(prev.dt * 1000) - targetTimestamp);
+            const currDiff = Math.abs(new Date(curr.dt * 1000) - targetTimestamp);
+            return currDiff < prevDiff ? curr : prev;
+        });
         
-        for (const item of forecast.list) {
-            const itemTime = item.dt * 1000;
-            if (itemTime <= targetTimestamp && itemTime > prevForecast.dt * 1000) {
-                prevForecast = item;
-            }
-            if (itemTime >= targetTimestamp && itemTime < nextForecast.dt * 1000) {
-                nextForecast = item;
-            }
-        }
-        
-        // Рассчитываем коэффициент интерполяции
-        const timeDiff = nextForecast.dt * 1000 - prevForecast.dt * 1000;
-        const ratio = timeDiff > 0 ? (targetTimestamp - prevForecast.dt * 1000) / timeDiff : 0;
-        
-        // Интерполируем температуру
-        const temp = interpolate(prevForecast.main.temp, nextForecast.main.temp, ratio);
-        
-        // Выбираем иконку (ближайшую по времени)
-        const icon = ratio < 0.5 ? prevForecast.weather[0].icon : nextForecast.weather[0].icon;
-        
-        // Создаем элемент прогноза
         const hourItem = document.createElement('div');
         hourItem.className = 'hourly-item';
         hourItem.innerHTML = `
             <div class="time">${targetHour.toString().padStart(2, '0')}:00</div>
-            <div class="icon">${weatherIcons[icon] || '🌤️'}</div>
-            <div class="temp">${Math.round(temp)}°</div>
+            <div class="icon">${weatherIcons[closest.weather[0].icon] || '🌤️'}</div>
+            <div class="temp">${Math.round(closest.main.temp)}°</div>
         `;
         elements.hourlyForecast.appendChild(hourItem);
     }
@@ -318,17 +355,7 @@ function displayWeather(current, forecast) {
     }
 }
 
-// Обработчики событий
-elements.cityInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        const city = elements.cityInput.value.trim();
-        if (city) {
-            fetchWeather(city);
-        }
-    }
-});
-
-// Загрузка при старте
+// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', () => {
     const savedCity = localStorage.getItem('lastCity') || 'Москва';
     elements.cityInput.value = savedCity;
@@ -336,6 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Обработка изменений темы Telegram
-tg.onEvent('themeChanged', () => {
-    document.body.dataset.theme = tg.colorScheme;
-});
+if (isTelegram()) {
+    Telegram.WebApp.onEvent('themeChanged', () => {
+        document.body.dataset.theme = Telegram.WebApp.colorScheme;
+    });
+}
