@@ -32,6 +32,7 @@ tg.expand();
 const elements = {
     cityInput: document.getElementById('city-input'),
     locationBtn: document.getElementById('location-btn'),
+    searchBtn: document.getElementById('search-btn'), // Добавлена кнопка поиска
     currentCity: document.getElementById('current-city'),
     currentTemp: document.getElementById('current-temp'),
     currentCondition: document.getElementById('current-condition'),
@@ -101,9 +102,17 @@ elements.cityInput.addEventListener('input', async (e) => {
     }
 });
 
+// Обработчик кнопки поиска
+elements.searchBtn.addEventListener('click', () => {
+    const city = elements.cityInput.value.trim();
+    if (city) {
+        fetchWeather(city);
+    }
+});
+
 // Скрываем подсказки при клике вне поля
 document.addEventListener('click', (e) => {
-    if (e.target !== elements.cityInput) {
+    if (e.target !== elements.cityInput && e.target !== elements.searchBtn) {
         elements.citySuggestions.style.display = 'none';
     }
 });
@@ -223,8 +232,29 @@ function displayWeather(current, forecast) {
     const uvIndex = Math.min(Math.round(current.main.temp / 5), 10);
     elements.uvIndex.textContent = uvIndex;
 
-    // Почасовой прогноз (первые 24 часа)
-    forecast.list.slice(0, 24).forEach(hour => {
+    // Почасовой прогноз (каждый час на 24 часа)
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    // Фильтруем прогноз, чтобы показать каждый час
+    const hourlyData = [];
+    for (let i = 0; i < 24; i++) {
+        const targetHour = (currentHour + i) % 24;
+        const targetTime = new Date(now);
+        targetTime.setHours(targetHour, 0, 0, 0);
+        
+        // Находим ближайший прогноз к этому часу
+        const closest = forecast.list.reduce((prev, curr) => {
+            const prevDiff = Math.abs(new Date(prev.dt * 1000) - targetTime);
+            const currDiff = Math.abs(new Date(curr.dt * 1000) - targetTime);
+            return currDiff < prevDiff ? curr : prev;
+        });
+        
+        hourlyData.push(closest);
+    }
+
+    // Отображаем почасовой прогноз
+    hourlyData.forEach(hour => {
         const hourItem = document.createElement('div');
         hourItem.className = 'hourly-item';
         hourItem.innerHTML = `
