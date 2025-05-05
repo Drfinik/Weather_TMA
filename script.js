@@ -32,7 +32,7 @@ tg.expand();
 const elements = {
     cityInput: document.getElementById('city-input'),
     locationBtn: document.getElementById('location-btn'),
-    searchBtn: document.getElementById('search-btn'), // Добавлена кнопка поиска
+    searchBtn: document.getElementById('search-btn'),
     currentCity: document.getElementById('current-city'),
     currentTemp: document.getElementById('current-temp'),
     currentCondition: document.getElementById('current-condition'),
@@ -228,44 +228,85 @@ function displayWeather(current, forecast) {
     elements.sunset.textContent = new Date(current.sys.sunset * 1000).toLocaleTimeString('ru', {timeStyle: 'short'});
     elements.visibility.textContent = `${current.visibility / 1000} км`;
     
-    // УФ-индекс (примерное значение)
+    // УФ-индекс
     const uvIndex = Math.min(Math.round(current.main.temp / 5), 10);
     elements.uvIndex.textContent = uvIndex;
 
-    // Почасовой прогноз (каждый час на 24 часа)
+    // Почасовой прогноз - НОВАЯ ЛОГИКА
     const now = new Date();
     const currentHour = now.getHours();
     
-    // Фильтруем прогноз, чтобы показать каждый час
-    const hourlyData = [];
-    for (let i = 0; i < 24; i++) {
+    // Создаем массив для 24 часов
+    const hourlyForecasts = [];
+    
+    // Находим ближайший прогноз к текущему времени
+    const currentForecast = forecast.list.reduce((prev, curr) => {
+        const prevDiff = Math.abs(new Date(prev.dt * 1000) - now);
+        const currDiff = Math.abs(new Date(curr.dt * 1000) - now);
+        return currDiff < prevDiff ? curr : prev;
+    });
+    
+    // Добавляем текущий прогноз
+    hourlyForecasts.push({
+        hour: currentHour,
+        forecast: currentForecast
+    });
+    
+    // Для каждого следующего часа находим ближайший прогноз
+    for (let i = 1; i < 24; i++) {
         const targetHour = (currentHour + i) % 24;
         const targetTime = new Date(now);
         targetTime.setHours(targetHour, 0, 0, 0);
         
-        // Находим ближайший прогноз к этому часу
-        const closest = forecast.list.reduce((prev, curr) => {
-            const prevDiff = Math.abs(new Date(prev.dt * 1000) - targetTime);
-            const currDiff = Math.abs(new Date(curr.dt * 1000) - targetTime);
+        const closestForecast = forecast.list.reduce((prev, curr) => {
+            const prevTime = new Date(prev.dt * 1000);
+            const currTime = new Date(curr.dt * 1000);
+            
+            // Предпочитаем прогнозы, которые точно попадают в нужный час
+            if (currTime.getHours() === targetHour && prevTime.getHours() !== targetHour) {
+                return curr;
+            }
+            if (prevTime.getHours() === targetHour && currTime.getHours() !== targetHour) {
+                return prev;
+            }
+            
+            // Иначе выбираем ближайший по времени
+            const prevDiff = Math.abs(prevTime - targetTime);
+            const currDiff = Math.abs(currTime - targetTime);
             return currDiff < prevDiff ? curr : prev;
         });
         
-        hourlyData.push(closest);
+        hourlyForecasts.push({
+            hour: targetHour,
+            forecast: closestForecast
+        });
     }
-
+    
+    // Удаляем дубликаты (если один прогноз попал в несколько часов)
+    const uniqueForecasts = [];
+    const usedTimestamps = new Set();
+    
+    hourlyForecasts.forEach(item => {
+        if (!usedTimestamps.has(item.forecast.dt)) {
+            uniqueForecasts.push(item);
+            usedTimestamps.add(item.forecast.dt);
+        }
+    });
+    
     // Отображаем почасовой прогноз
-    hourlyData.forEach(hour => {
+    elements.hourlyForecast.innerHTML = '';
+    uniqueForecasts.slice(0, 24).forEach(item => {
         const hourItem = document.createElement('div');
         hourItem.className = 'hourly-item';
         hourItem.innerHTML = `
-            <div class="time">${new Date(hour.dt * 1000).getHours()}:00</div>
-            <div class="icon">${weatherIcons[hour.weather[0].icon] || '🌤️'}</div>
-            <div class="temp">${Math.round(hour.main.temp)}°</div>
+            <div class="time">${item.hour}:00</div>
+            <div class="icon">${weatherIcons[item.forecast.weather[0].icon] || '🌤️'}</div>
+            <div class="temp">${Math.round(item.forecast.main.temp)}°</div>
         `;
         elements.hourlyForecast.appendChild(hourItem);
     });
 
-    // Дневной прогноз (10 дней)
+    // Дневной прогноз
     const dailyForecast = forecast.list.filter((item, index) => index % 8 === 0);
     dailyForecast.slice(0, 10).forEach(day => {
         const dayItem = document.createElement('div');
@@ -288,7 +329,7 @@ function displayWeather(current, forecast) {
             y: 20,
             stagger: 0.1,
             duration: 0.5
-        });
+        });  
     }
 }
 
